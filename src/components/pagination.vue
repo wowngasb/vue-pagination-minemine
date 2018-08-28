@@ -62,60 +62,70 @@
 
 <script>
 export default {
-  data: () => ({
-    num: 30,
-    limit: 3
-  }),
+  props: {
+    value: {
+      type: Number,
+      default: 0
+    },
+    num: {
+      type: [Number, String],
+      default: 0
+    },
+    limit: {
+      type: [Number, String],
+      default: 1
+    }
+  },
 
   computed: {
-    offset () {
-      return this.$store.state.offset
+    prePage() {
+      return this.value > 1 && this.num;
     },
 
-    prePage () {
-      return this.offset !== 0 && this.num
+    nextPage() {
+      return this.value < this.totalPage && this.num;
     },
 
-    nextPage () {
-      return (this.offset + this.limit < this.num) && this.num
+    totalPage() {
+      return Math.ceil(this.num / this.limit);
     },
 
-    totalPage () {
-      return Math.ceil(this.num / this.limit)
+    currentPage() {
+      return this.value;
     },
 
-    currentPage () {
-      return Math.ceil(this.offset / this.limit) + 1
-    },
-
-    showPageBtn () {
-      const pageNum = this.totalPage
-      const index = this.currentPage
-      if (pageNum <= 5) return [...new Array(5)].map((v, i) => i + 1)
-      if (index <= 2) return [1, 2, 3, 0, pageNum]
-      if (index >= pageNum - 1) return [1, 0, pageNum - 2, pageNum - 1, pageNum]
-      if (index === 3) return [1, 2, 3, 4, 0, pageNum]
-      if (index === pageNum - 2) return [1, 0, pageNum - 3, pageNum - 2, pageNum - 1, pageNum]
-      return [1, 0, index - 1, index, index + 1, 0, pageNum]
+    showPageBtn() {
+      const pageNum = this.totalPage;
+      const index = this.currentPage;
+      if (pageNum <= 5) return [...new Array(5)].map((v, i) => i + 1);
+      if (index <= 2) return [1, 2, 3, 0, pageNum];
+      if (index >= pageNum - 1)
+        return [1, 0, pageNum - 2, pageNum - 1, pageNum];
+      if (index === 3) return [1, 2, 3, 4, 0, pageNum];
+      if (index === pageNum - 2)
+        return [1, 0, pageNum - 3, pageNum - 2, pageNum - 1, pageNum];
+      return [1, 0, index - 1, index, index + 1, 0, pageNum];
     }
   },
 
   methods: {
-    pageOffset (i) {
-      if (i === 0 || i === this.currentPage) return
-      this.$store.commit('GO_PAGE', (i - 1) * this.limit)
-      this.$emit('getNew')
+    pageOffset(i) {
+      if (i === 0 || i === this.currentPage) return;
+      this.$emit("input", i);
     },
 
-    goPrePage () {
-      this.$store.commit('PRE_PAGE', this.limit)
-      this.$emit('getNew')
+    goPrePage() {
+      this.$emit("input", this.currentPage > 0 ? this.currentPage - 1 : 1);
     },
 
-    goNextPage () {
-      this.$store.commit('NEXT_PAGE', this.limit)
-      this.$emit('getNew')
+    goNextPage() {
+      this.$emit(
+        "input",
+        this.currentPage < this.totalPage
+          ? this.currentPage + 1
+          : this.totalPage
+      );
     }
   }
-}
+};
 </script>
